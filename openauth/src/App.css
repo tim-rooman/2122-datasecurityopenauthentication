@@ -51,7 +51,21 @@ justify-content: center;
 .infoBox img{
   height: 20rem;
   width: 25rem;
-  align-self: center;
+}
+
+.infoBox p{
+  text-align: left;
+  margin: 0.5rem;
+}
+
+.enterMessageBox{
+  display: flex;
+  flex-direction: column;
+}
+
+.enterMessageBox input{
+  width: 25rem;
+  height: 2.5rem;
 }
 
 /*source: https://codepen.io/mupkoo/pen/YgddgB */

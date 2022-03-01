@@ -10,6 +10,8 @@ import {
 
 function App() {
   const [user, setUSer] = useState(null);
+  const [personalMessage, setPersonalMessage] = useState("");
+
   const auth = getAuth();
 
   const signInWithGoogle = () => {
@@ -43,17 +45,28 @@ function App() {
         <span>Home</span>
         {user ? <img src={user.photoURL} alt="User profile" /> : null}
       </div>
-      {user ? (
-        <h1>Greetings, {user.displayName} </h1>
-      ) : (
-        <span>Please log in</span>
-      )}
+      {user ? <h1>Greetings, {user.displayName} </h1> : <h1>Please log in</h1>}
       {user ? (
         <div className="flexContainer">
           <div className="infoBox">
             <img src={user.photoURL} alt="User profile" />
-            <p>Your displayname is: {user.displayName}</p>
-            <p>Your email is: {user.email}</p>
+            <p>
+              <strong>Displayname:</strong> {user.displayName}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
+            <p>
+              <strong>Saved message:</strong> none
+            </p>
+          </div>
+          <div className="enterMessageBox">
+            <p>Please enter a message to save</p>
+            <input
+              onChange={(event) => setPersonalMessage(event.target.value)}
+              placeholder={"Enter a message that you want to save"}
+            />
+            <button>Save message</button>
           </div>
         </div>
       ) : null}
