@@ -18,10 +18,13 @@ function App() {
   const [haveGenderMale, setHaveGenderMale] = useState("");
   const [haveGenderFemale, setHaveGenderFemale] = useState("");
   const [haveGenderOther, setHaveGenderOther] = useState("");
+  const [loadedSavedMessage, setLoadedSavedMessage] = useState("");
+  const [loadedSavedGender, setLoadedSavedGender] = useState("");
 
   const auth = getAuth();
 
   useEffect(() => {
+    getUserInfo();
     countUsers();
   }, []);
 
@@ -55,10 +58,27 @@ function App() {
     setHaveGenderOther(otherSnapshot.size);
   }
 
+  async function getUserInfo() {
+    if (user) {
+      const qUser = query(
+        collection(db, "Users"),
+        where("User", "==", user.uid)
+      );
+      const userSnapshot = await getDocs(qUser);
+      userSnapshot.forEach((doc) => {
+        setLoadedSavedMessage(doc.data().savedMessage);
+        setLoadedSavedGender(doc.data().gender);
+      });
+    } else {
+      return;
+    }
+  }
+
   const addUserData = () => {
     addDoc(collection(db, "Users"), {
       savedMessage: personalMessage,
       gender: gender,
+      User: user.uid,
     });
   };
 
@@ -70,7 +90,6 @@ function App() {
         // const token = credential.accessToken;
         setUSer(re.user);
         const user = re.user;
-        console.log(user);
       })
       .catch((err) => {
         console.log(err);
@@ -112,7 +131,12 @@ function App() {
               <strong>Email:</strong> {user.email}
             </p>
             <p>
-              <strong>Saved message:</strong> none
+              <strong>Saved message:</strong>{" "}
+              {loadedSavedMessage !== "empty" ? loadedSavedMessage : "/"}
+            </p>
+            <p>
+              <strong>Your gender:</strong>{" "}
+              {loadedSavedGender !== "empty" ? loadedSavedGender : "/"}
             </p>
           </div>
           <div className="enterMessageBox">
