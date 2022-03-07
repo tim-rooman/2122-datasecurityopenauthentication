@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-import { authentication } from "./firebase-config";
+import { authentication, db } from "./firebase-config";
 import {
   getAuth,
   signInWithPopup,
@@ -8,11 +8,59 @@ import {
   signOut,
 } from "firebase/auth";
 
+import { collection, addDoc, query, getDocs, where } from "firebase/firestore";
+
 function App() {
   const [user, setUSer] = useState(null);
   const [personalMessage, setPersonalMessage] = useState("");
+  const [gender, setGender] = useState("");
+  const [haveSavedMessage, setHaveSavedMessage] = useState("");
+  const [haveGenderMale, setHaveGenderMale] = useState("");
+  const [haveGenderFemale, setHaveGenderFemale] = useState("");
+  const [haveGenderOther, setHaveGenderOther] = useState("");
 
   const auth = getAuth();
+
+  useEffect(() => {
+    countUsers();
+  }, []);
+
+  async function countUsers() {
+    const qMessage = query(
+      collection(db, "Users"),
+      where("savedMessage", "!=", "empty")
+    );
+    const messageSnapshot = await getDocs(qMessage);
+    setHaveSavedMessage(messageSnapshot.size);
+
+    const qGenderMale = query(
+      collection(db, "Users"),
+      where("gender", "==", "man")
+    );
+    const maleSnapshot = await getDocs(qGenderMale);
+    setHaveGenderMale(maleSnapshot.size);
+
+    const qGenderFemale = query(
+      collection(db, "Users"),
+      where("gender", "==", "woman")
+    );
+    const femaleSnapshot = await getDocs(qGenderFemale);
+    setHaveGenderFemale(femaleSnapshot.size);
+
+    const qGenderOther = query(
+      collection(db, "Users"),
+      where("gender", "==", "other")
+    );
+    const otherSnapshot = await getDocs(qGenderOther);
+    setHaveGenderOther(otherSnapshot.size);
+  }
+
+  const addUserData = () => {
+    addDoc(collection(db, "Users"), {
+      savedMessage: personalMessage,
+      gender: gender,
+    });
+  };
 
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
@@ -46,6 +94,13 @@ function App() {
         {user ? <img src={user.photoURL} alt="User profile" /> : null}
       </div>
       {user ? <h1>Greetings, {user.displayName} </h1> : <h1>Please log in</h1>}
+      <div>
+        <p>So far {haveSavedMessage} users saved a message.</p>
+        <p>
+          {haveGenderMale} of the users are men, {haveGenderFemale} woman and{" "}
+          {haveGenderOther} other
+        </p>
+      </div>
       {user ? (
         <div className="flexContainer">
           <div className="infoBox">
@@ -66,7 +121,15 @@ function App() {
               onChange={(event) => setPersonalMessage(event.target.value)}
               placeholder={"Enter a message that you want to save"}
             />
-            <button>Save message</button>
+            <select onChange={(event) => setGender(event.target.value)}>
+              <option disabled selected hidden>
+                Select gender
+              </option>
+              <option value="man">man</option>
+              <option value="woman">woman</option>
+              <option value="other">other</option>
+            </select>
+            <button onClick={() => addUserData()}>Save data</button>
           </div>
         </div>
       ) : null}
