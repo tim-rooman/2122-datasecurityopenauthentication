@@ -16,6 +16,7 @@ import {
   getDocs,
   where,
   updateDoc,
+  doc,
 } from "firebase/firestore";
 
 function App() {
@@ -28,7 +29,9 @@ function App() {
   const [haveGenderOther, setHaveGenderOther] = useState("");
   const [loadedSavedMessage, setLoadedSavedMessage] = useState("");
   const [loadedSavedGender, setLoadedSavedGender] = useState("");
+  const [docID, setDocID] = useState("");
 
+  const [test, setTest] = useState(false);
   const auth = getAuth();
 
   useEffect(() => {
@@ -76,30 +79,37 @@ function App() {
   async function getUserInfo() {
     const qUser = query(collection(db, "Users"), where("User", "==", user.uid));
     const userSnapshot = await getDocs(qUser);
-    userSnapshot.forEach((doc) => {
-      loadedSavedMessage === ""
-        ? setLoadedSavedMessage("/")
-        : setLoadedSavedMessage(doc.data().savedMessage);
-      loadedSavedGender === ""
-        ? setLoadedSavedGender("/")
-        : setLoadedSavedGender(doc.data().gender);
-    });
+    if (!userSnapshot.empty) {
+      userSnapshot.forEach((doc) => {
+        loadedSavedMessage === ""
+          ? setLoadedSavedMessage("/")
+          : setLoadedSavedMessage(doc.data().savedMessage);
+        loadedSavedGender === ""
+          ? setLoadedSavedGender("/")
+          : setLoadedSavedGender(doc.data().gender);
+        setDocID(doc.id);
+      });
+    } else {
+      setTest(true);
+    }
   }
 
   async function addUserData() {
-    addDoc(collection(db, "Users"), {
-      savedMessage: personalMessage,
-      gender: gender,
-      User: user.uid,
-    });
-    /*const qUpdateData = query(
-        collection(db, "Users"),
-        where("User", "==", user.uid)
-      );
+    if (test === true) {
+      addDoc(collection(db, "Users"), {
+        savedMessage: personalMessage,
+        gender: gender,
+        User: user.uid,
+      });
+    } else {
+      const qUpdateData = doc(db, "Users", docID);
       await updateDoc(qUpdateData, {
         savedMessage: personalMessage,
         gender: gender,
-      });*/
+      });
+    }
+    countUsers();
+    getUserInfo();
   }
 
   const signInWithGoogle = () => {
