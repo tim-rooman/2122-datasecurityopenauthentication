@@ -6,9 +6,17 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 
-import { collection, addDoc, query, getDocs, where } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  query,
+  getDocs,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 
 function App() {
   const [user, setUSer] = useState(null);
@@ -24,9 +32,16 @@ function App() {
   const auth = getAuth();
 
   useEffect(() => {
-    getUserInfo();
     countUsers();
   }, []);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      getUserInfo();
+    } else {
+      console.log("No user is logged in.");
+    }
+  });
 
   async function countUsers() {
     const qMessage = query(
@@ -59,28 +74,33 @@ function App() {
   }
 
   async function getUserInfo() {
-    if (user) {
-      const qUser = query(
-        collection(db, "Users"),
-        where("User", "==", user.uid)
-      );
-      const userSnapshot = await getDocs(qUser);
-      userSnapshot.forEach((doc) => {
-        setLoadedSavedMessage(doc.data().savedMessage);
-        setLoadedSavedGender(doc.data().gender);
-      });
-    } else {
-      return;
-    }
+    const qUser = query(collection(db, "Users"), where("User", "==", user.uid));
+    const userSnapshot = await getDocs(qUser);
+    userSnapshot.forEach((doc) => {
+      loadedSavedMessage === ""
+        ? setLoadedSavedMessage("/")
+        : setLoadedSavedMessage(doc.data().savedMessage);
+      loadedSavedGender === ""
+        ? setLoadedSavedGender("/")
+        : setLoadedSavedGender(doc.data().gender);
+    });
   }
 
-  const addUserData = () => {
+  async function addUserData() {
     addDoc(collection(db, "Users"), {
       savedMessage: personalMessage,
       gender: gender,
       User: user.uid,
     });
-  };
+    /*const qUpdateData = query(
+        collection(db, "Users"),
+        where("User", "==", user.uid)
+      );
+      await updateDoc(qUpdateData, {
+        savedMessage: personalMessage,
+        gender: gender,
+      });*/
+  }
 
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
@@ -89,7 +109,6 @@ function App() {
         // const credential = GoogleAuthProvider.credentialFromResult(re);
         // const token = credential.accessToken;
         setUSer(re.user);
-        const user = re.user;
       })
       .catch((err) => {
         console.log(err);
