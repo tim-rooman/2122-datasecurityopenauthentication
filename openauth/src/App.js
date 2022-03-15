@@ -81,6 +81,7 @@ function App() {
   async function getUserInfo() {
     const qUser = query(collection(db, "Users"), where("User", "==", user.uid));
     const userSnapshot = await getDocs(qUser);
+    setSnapEmpty(false);
     if (!userSnapshot.empty) {
       userSnapshot.forEach((doc) => {
         loadedSavedMessage === ""
