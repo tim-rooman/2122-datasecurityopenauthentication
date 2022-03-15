@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 
 function App() {
-  const [user, setUSer] = useState(null);
+  const [user, setUser] = useState(null);
   const [personalMessage, setPersonalMessage] = useState("");
   const [gender, setGender] = useState("");
   const [haveSavedMessage, setHaveSavedMessage] = useState("");
@@ -127,7 +127,8 @@ function App() {
         return signInWithPopup(auth, provider);
       })
       .then((re) => {
-        setUSer(re.user);
+        setUser(re.user);
+        localStorage.setItem("user", re.data);
       })
       .catch((err) => {
         console.log(err);
@@ -137,7 +138,7 @@ function App() {
   const signOutFromGoogle = () => {
     signOut(auth)
       .then(() => {
-        setUSer(null);
+        setUser(null);
       })
       .catch((error) => {
         console.log(error);
