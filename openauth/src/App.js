@@ -33,7 +33,7 @@ function App() {
   const [loadedSavedGender, setLoadedSavedGender] = useState("");
   const [docID, setDocID] = useState("");
 
-  const [test, setTest] = useState(false);
+  const [snapEmpty, setSnapEmpty] = useState(false);
   const auth = getAuth();
 
   useEffect(() => {
@@ -92,12 +92,12 @@ function App() {
         setDocID(doc.id);
       });
     } else {
-      setTest(true);
+      setSnapEmpty(true);
     }
   }
 
   async function addUserData() {
-    if (test === true) {
+    if (snapEmpty === true) {
       addDoc(collection(db, "Users"), {
         savedMessage: personalMessage,
         gender: gender,
