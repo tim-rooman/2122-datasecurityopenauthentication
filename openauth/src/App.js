@@ -7,8 +7,6 @@ import {
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
-  inMemoryPersistence,
-  setPersistence,
 } from "firebase/auth";
 
 import {
@@ -41,7 +39,7 @@ function App() {
   }, []);
 
   onAuthStateChanged(auth, (user) => {
-    if (user) {
+    if (auth.currentUser) {
       getUserInfo();
     } else {
       console.log("No user is logged in.");
@@ -79,10 +77,13 @@ function App() {
   }
 
   async function getUserInfo() {
-    const qUser = query(collection(db, "Users"), where("User", "==", user.uid));
+    const qUser = query(
+      collection(db, "Users"),
+      where("User", "==", auth.currentUser.uid)
+    );
     const userSnapshot = await getDocs(qUser);
-    setSnapEmpty(false);
     if (!userSnapshot.empty) {
+      setSnapEmpty(false);
       userSnapshot.forEach((doc) => {
         loadedSavedMessage === ""
           ? setLoadedSavedMessage("/")
@@ -98,14 +99,16 @@ function App() {
   }
 
   async function addUserData() {
-    if (snapEmpty === true) {
+    if (snapEmpty === false) {
       addDoc(collection(db, "Users"), {
         savedMessage: personalMessage,
         gender: gender,
         User: user.uid,
       });
     } else {
+      console.log("test");
       const qUpdateData = doc(db, "Users", docID);
+      console.log(qUpdateData);
       if (personalMessage !== "") {
         await updateDoc(qUpdateData, {
           savedMessage: personalMessage,
@@ -122,14 +125,10 @@ function App() {
   }
 
   const signInWithGoogle = () => {
-    setPersistence(auth, inMemoryPersistence)
-      .then(() => {
-        const provider = new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);
-      })
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
       .then((re) => {
         setUser(re.user);
-        localStorage.setItem("user", re.data);
       })
       .catch((err) => {
         console.log(err);
@@ -150,9 +149,15 @@ function App() {
     <div className="App">
       <div className="header">
         <span>Home</span>
-        {user ? <img src={user.photoURL} alt="User profile" /> : null}
+        {auth.currentUser ? (
+          <img src={auth.currentUser.photoURL} alt="User profile" />
+        ) : null}
       </div>
-      {user ? <h1>Greetings, {user.displayName} </h1> : <h1>Please log in</h1>}
+      {auth.currentUser ? (
+        <h1>Greetings, {auth.currentUser.displayName} </h1>
+      ) : (
+        <h1>Please log in</h1>
+      )}
       <div>
         <p>So far {haveSavedMessage} users saved a message.</p>
         <p>
@@ -160,15 +165,15 @@ function App() {
           {haveGenderOther} other
         </p>
       </div>
-      {user ? (
+      {auth.currentUser ? (
         <div className="flexContainer">
           <div className="infoBox">
-            <img src={user.photoURL} alt="User profile" />
+            <img src={auth.currentUser.photoURL} alt="User profile" />
             <p>
-              <strong>Displayname:</strong> {user.displayName}
+              <strong>Displayname:</strong> {auth.currentUser.displayName}
             </p>
             <p>
-              <strong>Email:</strong> {user.email}
+              <strong>Email:</strong> {auth.currentUser.email}
             </p>
             <p>
               <strong>Saved message:</strong>{" "}
@@ -197,7 +202,7 @@ function App() {
           </div>
         </div>
       ) : null}
-      {user ? (
+      {auth.currentUser ? (
         <button onClick={signOutFromGoogle} className="login-with-google-btn">
           Log out
         </button>
