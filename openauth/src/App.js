@@ -44,7 +44,7 @@ function App() {
     if (user) {
       getUserInfo();
     } else {
-      console.log("No user is logged in.");
+      return;
     }
   });
 
@@ -130,6 +130,7 @@ function App() {
       .then((re) => {
         setUser(re.user);
         localStorage.setItem("user", re.data);
+        getUserInfo();
       })
       .catch((err) => {
         console.log(err);
