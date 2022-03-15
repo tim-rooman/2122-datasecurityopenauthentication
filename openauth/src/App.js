@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import { authentication, db } from "./firebase-config";
+import { db } from "./firebase-config";
 import {
   getAuth,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
   onAuthStateChanged,
+  inMemoryPersistence,
+  setPersistence,
 } from "firebase/auth";
 
 import {
@@ -103,21 +105,28 @@ function App() {
       });
     } else {
       const qUpdateData = doc(db, "Users", docID);
-      await updateDoc(qUpdateData, {
-        savedMessage: personalMessage,
-        gender: gender,
-      });
+      if (personalMessage !== "") {
+        await updateDoc(qUpdateData, {
+          savedMessage: personalMessage,
+        });
+      }
+      if (gender !== "") {
+        await updateDoc(qUpdateData, {
+          gender: gender,
+        });
+      }
     }
     countUsers();
     getUserInfo();
   }
 
   const signInWithGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(authentication, provider)
+    setPersistence(auth, inMemoryPersistence)
+      .then(() => {
+        const provider = new GoogleAuthProvider();
+        return signInWithPopup(auth, provider);
+      })
       .then((re) => {
-        // const credential = GoogleAuthProvider.credentialFromResult(re);
-        // const token = credential.accessToken;
         setUSer(re.user);
       })
       .catch((err) => {
