@@ -51,7 +51,7 @@ function App() {
   async function countUsers() {
     const qMessage = query(
       collection(db, "Users"),
-      where("savedMessage", "!=", "empty")
+      where("savedMessage", "!=", "")
     );
     const messageSnapshot = await getDocs(qMessage);
     setHaveSavedMessage(messageSnapshot.size);
@@ -171,11 +171,11 @@ function App() {
             </p>
             <p>
               <strong>Saved message:</strong>{" "}
-              {loadedSavedMessage !== "empty" ? loadedSavedMessage : "/"}
+              {loadedSavedMessage !== "" ? loadedSavedMessage : "/"}
             </p>
             <p>
               <strong>Your gender:</strong>{" "}
-              {loadedSavedGender !== "empty" ? loadedSavedGender : "/"}
+              {loadedSavedGender !== "" ? loadedSavedGender : "/"}
             </p>
           </div>
           <div className="enterMessageBox">
