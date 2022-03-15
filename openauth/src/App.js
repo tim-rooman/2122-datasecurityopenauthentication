@@ -20,7 +20,6 @@ import {
 } from "firebase/firestore";
 
 function App() {
-  const [user, setUser] = useState(null);
   const [personalMessage, setPersonalMessage] = useState("");
   const [gender, setGender] = useState("");
   const [haveSavedMessage, setHaveSavedMessage] = useState("");
@@ -38,7 +37,7 @@ function App() {
     countUsers();
   }, []);
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, () => {
     if (auth.currentUser) {
       getUserInfo();
     } else {
@@ -99,16 +98,14 @@ function App() {
   }
 
   async function addUserData() {
-    if (snapEmpty === false) {
+    if (snapEmpty === true) {
       addDoc(collection(db, "Users"), {
         savedMessage: personalMessage,
         gender: gender,
-        User: user.uid,
+        User: auth.currentUser.uid,
       });
     } else {
-      console.log("test");
       const qUpdateData = doc(db, "Users", docID);
-      console.log(qUpdateData);
       if (personalMessage !== "") {
         await updateDoc(qUpdateData, {
           savedMessage: personalMessage,
@@ -127,8 +124,8 @@ function App() {
   const signInWithGoogle = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
-      .then((re) => {
-        setUser(re.user);
+      .then(() => {
+        window.location.reload(true);
       })
       .catch((err) => {
         console.log(err);
@@ -138,7 +135,7 @@ function App() {
   const signOutFromGoogle = () => {
     signOut(auth)
       .then(() => {
-        setUser(null);
+        window.location.reload(true);
       })
       .catch((error) => {
         console.log(error);
