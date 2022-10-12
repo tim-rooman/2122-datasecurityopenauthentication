@@ -1,9 +1,9 @@
 # Guide to start using this project
 
-- open je commandline in de folder waar je het project wilt opslaan en voer git clone https://gitlab.com/tim.rooman/2122-datasecurityopenauthenticationroomantim.git uit
+- open your commandline in the folder where you want to save the project and run git clone https://github.com/tim-rooman/2122-datasecurityopenauthentication.git
 
-- open de map in je IDE, zorg ervoor dat je commandline van je IDE in de map OPENAUTH zit
+- open the folder in your IDE of choice, make sure the commandline of your IDE is in the OPENAUTH folder (you may need to run cd openauth for this to happen)
 
-- voer npm install uit
+- run npm install
 
-- voer npm start uit dat commando zal op localhost de website starten
+- run npm start, this will start the website on localhost
